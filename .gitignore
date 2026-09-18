@@ -1,0 +1,16 @@
+# Project exclude paths
+/node_modules/
+/node_modules/@mongodb-js/saslprep/
+/node_modules/@types/webidl-conversions/LICENSE
+/node_modules/@types/webidl-conversions/README.md
+/node_modules/@types/whatwg-url/LICENSE
+/node_modules/@types/whatwg-url/README.md
+/node_modules/bson/
+/node_modules/dotenv/
+/node_modules/express/LICENSE
+/node_modules/express/Readme.md
+/node_modules/mongodb/
+/node_modules/mongodb-connection-string-url/
+
+.env
+node_modules
