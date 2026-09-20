@@ -4,6 +4,7 @@ import "./common/db/mongodb.js";
 import userRoutes from './features/user/route/user.route.js';
 import messageRouter from './features/message/route/message.route.js';
 import authRouter from './features/auth/route/auth.route.js';
+import {OTP} from "./features/auth/model/otp.model.js";
 
 const app = express();
 
@@ -21,7 +22,7 @@ app.use((req, res, next) => {
 /// handle global errors
 app.use((err, req, res, next) => {
     console.log(err);
-    res.status(err.statusCode || 500).json({ message: err.message, success: false });
+    res.status(err.statusCode || 500).json({ message: err.message, success: false,stack:err.stack });
 });
 
 app.listen(3000, () => console.log('🚀 Server running on port 3000'));
