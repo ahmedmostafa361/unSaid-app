@@ -22,7 +22,16 @@ app.use((req, res, next) => {
 /// handle global errors
 app.use((err, req, res, next) => {
     console.log(err);
-    res.status(err.statusCode || 500).json({ message: err.message, success: false,stack:err.stack });
+    if (err.isOperational === true) {  /// to handle our custom errors we did
+        return res.status(err.statusCode).json({
+            message: err.message,
+            success: false,
+            stack: err.stack
+        });
+    }
+    return res.status(500).json({
+        message: "Something went wrong",
+        success: false,
+    })
 });
-
 app.listen(3000, () => console.log('🚀 Server running on port 3000'));
