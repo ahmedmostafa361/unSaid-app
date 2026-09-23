@@ -5,7 +5,7 @@ import userRoutes from './features/user/route/user.route.js';
 import messageRouter from './features/message/route/message.route.js';
 import authRouter from './features/auth/route/auth.route.js';
 import {OTP} from "./features/auth/model/otp.model.js";
-
+import {logger} from "./common/logger/logger.js";
 const app = express();
 
 app.use(express.json());
@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 
 /// handle global errors
 app.use((err, req, res, next) => {
-    console.log(err);
+    logger.error(err.message, err);
     if (err.isOperational === true) {  /// to handle our custom errors we did
         return res.status(err.statusCode).json({
             message: err.message,
@@ -34,4 +34,4 @@ app.use((err, req, res, next) => {
         success: false,
     })
 });
-app.listen(3000, () => console.log('🚀 Server running on port 3000'));
+app.listen(3000, () => logger.info("🚀 Server running on port 3000"));
