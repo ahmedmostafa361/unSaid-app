@@ -1,5 +1,7 @@
+import {AppError} from "../../common/errors/error.js";
 
-export const invalidPassword = new Error("Invalid password");
-export const invalidEmail = new Error("Invalid email");
-export const otpExpired = new Error("Invalid or Expired OTP , please resend OTP");
-export const invalidCode = new Error("Invalid OTP");
+
+export const invalidPassword = new AppError("Invalid password",403);
+export const invalidEmail = new AppError("Invalid email",403);
+export const otpExpired = new AppError("Invalid or Expired OTP , please resend OTP",404);
+export const invalidCode = new AppError("Invalid OTP",400);
