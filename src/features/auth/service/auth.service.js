@@ -14,6 +14,9 @@ import {invalidPassword,invalidCode,
 import {userAlreadyExists, userAlreadyVerified, userNotExist, userNotVerified} from "../../user/errors.js";
 import jwt from "jsonwebtoken";
 import {generateOTP} from "../../../common/utils/otp.js";
+import {generateToken} from "../../../common/utils/token.js";
+import {hashPassword,comparePassword} from "../../../common/utils/hash.js";
+
 
 export const register = async (userData) => {
     // 1 check if user already exists
@@ -25,7 +28,7 @@ export const register = async (userData) => {
         throw userAlreadyExists;
     }
     // 3 prepare data hash password
-    userData.password = await bcrypt.hash(userData.password, 10);
+    userData.password = await hashPassword(userData.password);
     // 4 save user into data base -> isVerified: false
     const createdUser = await authRepository.createUser(userData);
     // 5 generate OTP and save it into database
@@ -78,21 +81,23 @@ export const login = async (email, password) => {
     if (!user) throw userNotExist;
     if (user.isVerified === false) throw userNotVerified;
     // 2 compare password
-    const isPasswordMatched = await bcrypt.compare(password, user.password);
+    const isPasswordMatched = await comparePassword(password,user['password'])
     if (!isPasswordMatched) throw invalidPassword;
     // 3 generate access token
-    const token = await jwt.sign(
+    //{
+    //             userId: user._id,
+    //             email: user.email,
+    //             name: user.name,
+    //             isVerified: user.isVerified,
+    //         },
+    const token = await generateToken(
         {
-            userId: user._id,
-            email: user.email,
-            name: user.name,
-            isVerified: user.isVerified,
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: toMs(1, "hours")
-        }
-    )
+                    userId: user._id,
+                    email: user.email,
+                    name: user.name,
+                    isVerified: user.isVerified,
+                },
+    );
     // 4 return user
     return token;
 };
