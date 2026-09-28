@@ -130,3 +130,21 @@ export const sendOtp = async (email) => {
         getPasswordResetTemplate(otpCode)
     );
 };
+
+export const resetPassword = async (email,code,newPassword) => {
+    /// 1.verify otp code
+    const otp = await otpRepository.getOtpByEmail(email);
+    if (!otp) throw otpExpired;
+    if(otp.code !== code) throw invalidCode;
+    ///2 hash password
+    const hashedPassword = await hashPassword(newPassword);
+
+    // 3. update user password
+    await userRepository.updateUserByEmail(email,{
+        password: hashedPassword
+    });
+    /// 4 delete otp
+    await otpRepository.deleteOtpByEmail(email);
+
+
+}
