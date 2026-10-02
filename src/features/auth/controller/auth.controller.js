@@ -78,3 +78,21 @@ export const resetPasswordController = async (req,res,next) => {
         next(error);
     }
 }
+
+export const loginWithGoogle = async (req,res,next) => {
+    try{
+        const {idToken} = req.body;
+        const user = await authService.loginWithGoogle(idToken);
+        res.cookie('access_token',user.token,{
+            httpOnly: true,
+            maxAge: toMs(1, "hours")
+        });
+        res.status(200).json({
+            message: "Login successful",
+            success: true,
+            data: user
+        });
+    }catch (error){
+        next(error);
+    }
+}

@@ -7,7 +7,8 @@ import authRouter from './features/auth/route/auth.route.js';
 import {OTP} from "./features/auth/model/otp.model.js";
 import {logger} from "./common/logger/logger.js";
 const app = express();
-
+import cors from 'cors';
+app.use(cors('http://localhost:4200'));
 app.use(express.json());
 
 app.use('/auth', authRouter);
