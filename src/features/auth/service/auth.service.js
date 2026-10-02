@@ -1,8 +1,7 @@
 import * as authRepository from "../repository/auth.repo.js";
 import * as otpRepository from "../repository/otp.repo.js";
 import * as userRepository from "../../user/repository/user.repo.js";
-import bcrypt from "bcrypt";
-import crypto from "crypto";
+
 import { sendEmail } from "../../../common/email/nodeMailer.js";
 import {
     getPasswordResetTemplate,
@@ -12,10 +11,10 @@ import { toMs } from "../../../common/utils/time.js";
 import {invalidPassword,invalidCode,
     otpExpired} from "../errors.js";
 import {userAlreadyExists, userAlreadyVerified, userNotExist, userNotVerified} from "../../user/errors.js";
-import jwt from "jsonwebtoken";
 import {generateOTP} from "../../../common/utils/otp.js";
 import {generateToken} from "../../../common/utils/token.js";
 import {hashPassword,comparePassword} from "../../../common/utils/hash.js";
+import {verifyGoogleToken} from "../../../common/utils/google_auth.js";
 
 
 export const register = async (userData) => {
@@ -145,6 +144,36 @@ export const resetPassword = async (email,code,newPassword) => {
     });
     /// 4 delete otp
     await otpRepository.deleteOtpByEmail(email);
-
-
 }
+
+
+
+/// login with google
+export const loginWithGoogle = async (idToken) => {
+    //1. verify idToken
+    const payload = await verifyGoogleToken(idToken);
+    //3. check if user exists >> if exist generate token
+    const user =await authRepository.checkUserExistByEmail(payload.email);
+    if(user) {
+        return generateToken(
+            {
+                userId: user._id,
+                email: user.email,
+            },
+        );
+    }
+    //4. if not create user
+    const createdUser = await authRepository.createUser({
+        email: payload.email,
+        name: payload.name,
+        provider: 'google',
+    });
+    //5. login user and generate token
+    return generateToken(
+        {
+            userId: createdUser._id,
+            email: createdUser.email,
+        },
+    );
+};
+
