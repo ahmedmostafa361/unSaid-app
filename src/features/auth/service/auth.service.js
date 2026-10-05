@@ -2,19 +2,19 @@ import * as authRepository from "../repository/auth.repo.js";
 import * as otpRepository from "../repository/otp.repo.js";
 import * as userRepository from "../../user/repository/user.repo.js";
 
-import { sendEmail } from "../../../common/email/nodeMailer.js";
+import { sendEmail } from "../../../lib/email/nodeMailer.js";
 import {
     getPasswordResetTemplate,
     getEmailVerificationTemplate,
-} from "../../../common/templates/emailTemplates.js";
-import { toMs } from "../../../common/utils/time.js";
+} from "../../../lib/templates/emailTemplates.js";
+import { toMs } from "../../../pkg/utils/time.js";
 import {invalidPassword,invalidCode,
     otpExpired} from "../errors.js";
 import {userAlreadyExists, userAlreadyVerified, userNotExist, userNotVerified} from "../../user/errors.js";
-import {generateOTP} from "../../../common/utils/otp.js";
-import {generateToken} from "../../../common/utils/token.js";
-import {hashPassword,comparePassword} from "../../../common/utils/hash.js";
-import {verifyGoogleToken} from "../../../common/utils/google_auth.js";
+import {generateOTP} from "../../../lib/utils/otp.js";
+import {generateToken} from "../../../pkg/utils/token.js";
+import {hashPassword,comparePassword} from "../../../pkg/utils/hash.js";
+import {verifyGoogleToken} from "../../../lib/utils/google_auth.js";
 
 
 export const register = async (userData) => {

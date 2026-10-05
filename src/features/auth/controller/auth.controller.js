@@ -1,6 +1,6 @@
 import * as authService from '../service/auth.service.js';
-import {toMs} from "../../../common/utils/time.js";
-import {validateBody} from "../../../common/validation/validation.js";
+import {toMs} from "../../../pkg/utils/time.js";
+import {validateBody} from "../../../lib/validation/validation.js";
 import {registerDto,verifyEmailDto,loginDto,resetPasswordDto,sendOtpDto} from "../dto/auth.dto.js";
 
 export const register = async (req,res,next) => {

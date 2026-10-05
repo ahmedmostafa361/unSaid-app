@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import { AppError } from "../errors/error.js";
+import { AppError } from "../../pkg/errors/error.js";
 
 // Initialize client once outside the function scope
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
