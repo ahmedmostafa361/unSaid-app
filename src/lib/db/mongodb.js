@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from 'dotenv';
-import {logger} from '../logger/logger.js';
+import {logger} from '../../pkg/logger/logger.js';
 config(); // Ensures .env is loaded before mongoose connects
 
 mongoose.connect(process.env.MONGODB_URI)

@@ -1,11 +1,11 @@
 import 'dotenv/config';
 import express from 'express';
-import "./common/db/mongodb.js";
+import "./lib/db/mongodb.js";
 import userRoutes from './features/user/route/user.route.js';
 import messageRouter from './features/message/route/message.route.js';
 import authRouter from './features/auth/route/auth.route.js';
 import {OTP} from "./features/auth/model/otp.model.js";
-import {logger} from "./common/logger/logger.js";
+import {logger} from "./pkg/logger/logger.js";
 const app = express();
 import cors from 'cors';
 app.use(cors('http://localhost:4200'));
