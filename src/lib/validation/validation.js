@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppError } from "../../pkg/errors/error.js";
+import { AppError } from "../errors/error.js";
 
 export const validateBody = (dto, body) => {
     // Validate that 'dto' passed in is a valid Zod schema using 'z'

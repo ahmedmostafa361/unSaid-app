@@ -1,4 +1,4 @@
-import {AppError} from "../../pkg/errors/error.js";
+import {AppError} from "../../lib/errors/error.js";
 
 
 export const invalidPassword = new AppError("Invalid password",403);
