@@ -102,7 +102,7 @@
     - express - bcrypt - jsonwebtoken >> ngl
 
 2. caching.✅
-    - mandatory features
+    - mandatory features.
     - reduce latency. FE <-> BE <-> DB.
     - avoid frequent DB queries.
     - datastructures >> hash-map. [key-value]
