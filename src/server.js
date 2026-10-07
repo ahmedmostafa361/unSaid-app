@@ -1,6 +1,6 @@
 import http from 'http';
 import mongoose from 'mongoose';
-import { createApp } from './index.js';
+import { createApp } from './app.js';
 import { env } from './lib/config/env.js';
 import { logger } from './pkg/logger/logger.js';
 

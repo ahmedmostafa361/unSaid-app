@@ -4,12 +4,14 @@ import './lib/db/mongodb.js';
 import cors from 'cors';
 import { globalErrorHandler } from './lib/errors/error.handler.js';
 import { router } from './routes.js';
+import {correlationId} from "./lib/correlation/correlationld.js";
 
 export function createApp() {
     const app = express();
 
     app.use(cors({ origin: 'http://localhost:4200' }));
     app.use(express.json());
+    app.use(correlationId)
     app.use('/api', router);
 
     // invalid routes
