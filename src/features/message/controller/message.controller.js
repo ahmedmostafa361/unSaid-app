@@ -1,5 +1,5 @@
 import * as messageService from '../service/message.service.js';
-import { sendMessageDto } from "../dto/message.dto.js";
+import { sendMessageDto, getMessagesQueryDto } from "../dto/message.dto.js";
 import { validateBody } from "../../../lib/validation/validation.js";
 
 export const sendMessageController = async (req, res, next) => {
@@ -17,6 +17,27 @@ export const sendMessageController = async (req, res, next) => {
         res.status(201).json({
             message: "Message sent successfully",
             success: true,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAllMessageController = async (req, res, next) => {
+    try {
+        // validate query params (?page=1&limit=20)
+        const query = validateBody(getMessagesQueryDto, req.query);
+
+        const { messages, pagination } = await messageService.getAllMessages(
+            req.user.userId,
+            query
+        );
+
+        res.status(200).json({
+            message: "Messages fetched successfully",
+            success: true,
+            data: messages,
+            pagination,
         });
     } catch (error) {
         next(error);
