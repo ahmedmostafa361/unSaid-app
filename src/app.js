@@ -5,12 +5,14 @@ import cors from 'cors';
 import { globalErrorHandler } from './lib/errors/error.handler.js';
 import { router } from './routes.js';
 import {correlationId} from "./lib/correlation/correlationld.js";
+import cookieParser from "cookie-parser";
 
 export function createApp() {
     const app = express();
 
     app.use(cors({ origin: 'http://localhost:4200' }));
     app.use(express.json());
+    app.use(cookieParser());
     app.use(correlationId)
     app.use('/api', router);
 

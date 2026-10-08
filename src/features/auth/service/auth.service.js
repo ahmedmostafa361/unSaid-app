@@ -2,8 +2,8 @@ import * as authRepository from "../repository/auth.repo.js";
 import * as otpRepository from "../repository/otp.repo.js";
 import * as userRepository from "../../user/repository/user.repo.js";
 
-// import { sendEmail } from "../../../lib/email/nodeMailer.js"; this used for node mailer
-import { sendEmail } from "../../../lib/email/init.js";
+import { sendEmail } from "../../../lib/email/nodeMailer.js"; //this used for node mailer
+// import { sendEmail } from "../../../lib/email/init.js";
 import {
     getPasswordResetTemplate,
     getEmailVerificationTemplate,

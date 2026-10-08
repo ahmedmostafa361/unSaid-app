@@ -1,43 +1,16 @@
-//schema for message
-
-/*
-*
-* Message
-
-- content -> [String - required - trim:true - minlength:1 - maxlength:200]
-- receiver -> [ObjectId - required - ref:'User']
-- sender -> [ObjectId - ref:'User']
-- isDeleted -> [boolean] – [default: false]
-- createdAt -> [Date]
-- updatedAt -> [Date]
-*/
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const messageSchema = new Schema(
     {
-        content: {
-            type: String,
-            required: true,
-            trim: true,
-            minlength: 1,
-            maxlength: 200
-        },
-        receiver: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'User'
-        },
-        sender: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-        },
-        isDeleted: {
-            type: Boolean,
-            default: false
-        },
-        timestamps : true
-    }
+        content: { type: String, required: true, trim: true, minlength: 1, maxlength: 200 },
+        receiver: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+        sender: { type: Schema.Types.ObjectId, ref: "User" },
+        isDeleted: { type: Boolean, default: false },
+    },
+    { timestamps: true } // option goes in the 2nd argument
 );
 
-// model
-export const Message = mongoose.model('Message', messageSchema);
+// fast lookup of a user's inbox
+messageSchema.index({ receiver: 1, isDeleted: 1, createdAt: -1 });
+
+export const Message = mongoose.model("Message", messageSchema);
