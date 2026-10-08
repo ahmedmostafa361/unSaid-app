@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { AppError } from "../errors/error.js";
 
-export function guard(req, res, next) {
+export function authGuard(req, res, next) {
     try {
         // read the token from the cookie
         const token = req.cookies?.access_token;
