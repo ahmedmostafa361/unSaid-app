@@ -1,41 +1,34 @@
-import multer, {diskStorage} from 'multer';
+import multer, { diskStorage } from 'multer';
 import crypto from 'node:crypto';
-import {AppError} from "../errors/error.js";
+import { AppError } from "../errors/error.js";
+import { allowedFields } from "./file.validation.js";
 
-function fileUpload(allowedTypes = ['image/png, ;image/jpeg']) {
-    return multer(
-        {
-            fileFilter: (req, file, cb) => {
-                if(allowedTypes.includes(file.mimetype)) {
-                    cb(null, true);
-                } else {
-                    return cb(new AppError('Invalid file format',400), false);
-                }
-            },
-            storage: diskStorage(
-                {
-                    destination: "uploads",
-                    filename: (req, file, cb) => {
-                        console.log(file);
-                        cb(null, `${crypto.randomUUID()}-${file.originalname}`);
-                    }
-                }
-            )
-        }
-    )
+function fileUpload(allowedTypes = allowedFields.images) {
+    return multer({
+        fileFilter: (req, file, cb) => {
+            if (allowedTypes.includes(file.mimetype)) {
+                cb(null, true);
+            } else {
+                cb(new AppError('Invalid file format MIME type', 400), false);
+            }
+        },
+        storage: diskStorage({
+            destination: "uploads",
+            filename: (req, file, cb) => {
+                cb(null, `${crypto.randomUUID()}-${file.originalname}`);
+            }
+        })
+    });
 }
-// storage :
-// 1. disk [hdd]
-// folder => fileName
-// 2. memory [ram]
-export function uploadSingleFile(filedName,allowedTypes =['image/png, ;image/jpeg']) {
-    return fileUpload(allowedTypes).single(filedName);
+
+export function uploadSingleFile(fieldName, allowedTypes = allowedFields.images) {
+    return fileUpload(allowedTypes).single(fieldName);
 }
-export function uploadMultipleFile(filedName,maxCount) {
-    return fileUpload().array(filedName,maxCount);
+
+export function uploadMultipleFile(fieldName, maxCount, allowedTypes = allowedFields.images) {
+    return fileUpload(allowedTypes).array(fieldName, maxCount);
 }
-export function uploadMultipleFileWithSize(fields) {
-   return fileUpload().fields(
-       fields
-   );
+
+export function uploadMultipleFileWithSize(fields, allowedTypes = allowedFields.images) {
+    return fileUpload(allowedTypes).fields(fields);
 }
