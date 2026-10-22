@@ -11,6 +11,7 @@ export function createApp() {
     const app = express();
 
     app.use(cors({ origin: 'http://localhost:4200' }));
+    app.use('/uploads',express.static('uploads'));
     app.use(express.json());
     app.use(cookieParser());
     app.use(correlationId)
