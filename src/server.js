@@ -7,8 +7,8 @@ import { logger } from './pkg/logger/logger.js';
 const app = createApp();
 const server = http.createServer(app);
 
-server.listen(env.port, () => {
-    logger.info(`🚀 Server running on port ${env.port}`);
+server.listen(3003, () => {
+    logger.info(`🚀 Server running on port ${3003}`);
 });
 
 let shuttingDown = false;

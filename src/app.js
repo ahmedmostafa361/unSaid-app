@@ -16,7 +16,10 @@ export function createApp() {
     app.use(cookieParser());
     app.use(correlationId)
     app.use('/api', router);
-
+    app.get('/health', (req, res) => {
+        console.log("server is hit")
+        res.status(200).json({ message: 'Server is running', success: true });
+    })
     // invalid routes
     app.use((req, res) => {
         res.status(404).json({ message: 'Invalid route', success: false });
