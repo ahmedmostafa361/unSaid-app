@@ -14,7 +14,19 @@
 // - createdAt [Date]
 // - updatedAt [Date]
 
-import mongoose, {Schema} from "mongoose"
+import mongoose, { Schema } from "mongoose";
+import { USER_ROLES } from "../../../lib/config/constants.js";
+
+const settingsSchema = new Schema(
+    {
+        acceptMessages: { type: Boolean, default: true },
+        allowGuestMessages: { type: Boolean, default: true },
+        showPublicMessages: { type: Boolean, default: true },
+        emailNotifications: { type: Boolean, default: true },
+    },
+    { _id: false }
+);
+
 const userSchema = new Schema(
     {
         name: {
@@ -22,54 +34,98 @@ const userSchema = new Schema(
             required: true,
             minlength: 3,
             maxlength: 20,
-            trim: true
+            trim: true,
+        },
+        username: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            minlength: 3,
+            maxlength: 30,
         },
         email: {
             type: String,
             required: true,
             unique: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
         },
         password: {
             type: String,
-            required: function (){
-                return this.provider === 'local'; // true in case of local provider
-            }
+            select: false,
+            required: function () {
+                return this.provider === "local"; // true in case of local provider
+            },
         },
-
         provider: {
             type: String,
-            enum: ['local', 'google', 'facebook'],
-            default: 'local'
+            enum: ["local", "google", "facebook"],
+            default: "local",
         },
-
-        isDeleted: {
-            type: Boolean,
-            default: false
+        role: {
+            type: String,
+            enum: Object.values(USER_ROLES),
+            default: USER_ROLES.USER,
         },
         isVerified: {
             type: Boolean,
-            default: false
+            default: false,
+        },
+        twoStepEnabled: {
+            type: Boolean,
+            default: false,
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+        deletedAt: {
+            type: Date,
+            default: null,
         },
         dob: {
-            type: Date
+            type: Date,
         },
         gender: {
             type: String,
-            enum: ['Male', 'Female'],
-            default: 'Male'
+            enum: ["Male", "Female"],
+        },
+        bio: {
+            type: String,
+            trim: true,
+            maxlength: 160,
+            default: "",
         },
         profilePicturePath: {
             type: String,
-            default: null
+            default: null,
         },
         coverImagePath: [String],
-        cvPath:String
-    }
-    ,{
-        timestamps: true
+        cvPath: String,
+        settings: {
+            type: settingsSchema,
+            default: () => ({}),
+        },
+        passwordChangedAt: Date,
+        lastLoginAt: Date,
+    },
+    {
+        timestamps: true,
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.password;
+                delete ret.__v;
+                return ret;
+            },
+        },
     }
 );
+
+userSchema.index(
+    { username: 1 },
+    { unique: true, partialFilterExpression: { username: { $type: "string" } } }
+);
+userSchema.index({ isDeleted: 1, name: 1 });
+
 // model
-export const User = mongoose.model('User', userSchema);
+export const User = mongoose.model("User", userSchema);

@@ -1,3 +1,5 @@
+import { escapeHtml } from "../../pkg/utils/string.js";
+
 export const baseEmailLayout = ({ title, bodyContent }) => {
     return `
 <!DOCTYPE html>
@@ -5,7 +7,7 @@ export const baseEmailLayout = ({ title, bodyContent }) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }

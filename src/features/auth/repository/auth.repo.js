@@ -1,9 +1,9 @@
 import { User } from "../../user/model/user.model.js";
-export  const checkUserExistByEmail = async (email) => {
-   return await User.findOne({email: email});
+
+export const checkUserExistByEmail = async (email) => {
+    return User.findOne({ email }).select("+password");
 };
 
-export const createUser = async (userData) =>
-{
-    return await User.create(userData);
-}
+export const createUser = async (userData) => {
+    return User.create(userData);
+};
