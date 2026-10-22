@@ -2,28 +2,42 @@
 
 class Logger {
     constructor() {
-        if (!Logger.instance){
+        if (!Logger.instance) {
             Logger.instance = this;
         }
         return Logger.instance;
     }
-    log(level,message,metaData = {}){
-        let messageObj = {
+
+    log(level, message, metaData = {}) {
+        const messageObj = {
             level, /// log, error, debug, info
             message,
             timestamp: new Date().toISOString(),
-            ...metaData
+            ...metaData,
+        };
+        const line = JSON.stringify(messageObj);
+        if (level === "error") {
+            console.error(line);
+        } else {
+            console.log(line);
         }
-        console.log(JSON.stringify(messageObj));
     }
-    error(message,metaData = {}){
-        this.log("error",message,metaData);
+
+    error(message, metaData = {}) {
+        this.log("error", message, metaData);
     }
-    debug(message,metaData = {}){
-        this.log("debug",message,metaData);
+
+    warn(message, metaData = {}) {
+        this.log("warn", message, metaData);
     }
-    info(message,metaData = {}){
-        this.log("info",message,metaData);
+
+    debug(message, metaData = {}) {
+        this.log("debug", message, metaData);
+    }
+
+    info(message, metaData = {}) {
+        this.log("info", message, metaData);
     }
 }
+
 export const logger = new Logger();

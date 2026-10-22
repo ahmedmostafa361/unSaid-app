@@ -1,81 +1,76 @@
-import { fileTypeFromBuffer } from "file-type";
-import fs from "fs";
+import { fileTypeFromFile } from "file-type";
 import { AppError } from "../errors/error.js";
+import { removeFiles } from "../../pkg/utils/files.js";
+
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 export const allowedFields = {
-    images: ['image/png', 'image/jpeg'],
-    videos: ['video/mp4'],
-    files: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-    audio: ['audio/mpeg', 'audio/mp3', 'audio/wav'],
+    images: ["image/png", "image/jpeg", "image/webp"],
+    videos: ["video/mp4"],
+    files: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    audio: ["audio/mpeg", "audio/mp3", "audio/wav"],
 };
 
-// Helper function to safely delete files if validation fails
-const cleanupFiles = (filesList) => {
-    filesList.forEach((file) => {
-        if (file && file.path && fs.existsSync(file.path)) {
-            try {
-                fs.unlinkSync(file.path);
-            } catch (err) {
-                console.error("Failed to delete invalid file:", err);
-            }
-        }
-    });
+const legacyOfficeTypes = new Set(["application/x-cfb"]);
+
+// Gather all uploaded files regardless of single/multiple/fields configuration
+const collectFiles = (req) => {
+    if (req.file) return [req.file];
+    if (!req.files) return [];
+    if (Array.isArray(req.files)) return req.files;
+    // Handles multer .fields() where req.files is an object of arrays
+    return Object.values(req.files).flat();
+};
+
+const isAllowed = (detected, file, allowedTypes) => {
+    if (!detected) return false;
+    if (allowedTypes.includes(detected.mime)) return true;
+    if (file.mimetype === "application/msword" && legacyOfficeTypes.has(detected.mime)) return true;
+    if (
+        file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+        detected.mime === "application/zip"
+    ) {
+        return allowedTypes.includes(file.mimetype);
+    }
+    return false;
 };
 
 export const fileValidation = (allowedTypes = allowedFields.images) => async (req, res, next) => {
+    const files = collectFiles(req);
+    // If no files were uploaded, pass through
+    if (files.length === 0) return next();
+
     try {
-        // Gather all uploaded files regardless of single/multiple/fields configuration
-        const filesToValidate = [];
-
-        if (req.file) {
-            filesToValidate.push(req.file);
-        } else if (req.files) {
-            if (Array.isArray(req.files)) {
-                filesToValidate.push(...req.files);
-            } else {
-                // Handles multer .fields() where req.files is an object of arrays
-                for (const fieldName of Object.keys(req.files)) {
-                    filesToValidate.push(...req.files[fieldName]);
-                }
-            }
-        }
-
-        // If no files were uploaded, pass through
-        if (filesToValidate.length === 0) {
-            return next();
-        }
-
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-
         // Validate size and magic number for every uploaded file
-        for (const file of filesToValidate) {
+        for (const file of files) {
             // 1. Check file size
-            if (file.size > MAX_SIZE) {
-                cleanupFiles(filesToValidate);
+            if (file.size > MAX_FILE_SIZE) {
+                await removeFiles(files.map((item) => item.path));
                 return next(new AppError(`File "${file.originalname}" exceeds the 5MB size limit.`, 400));
             }
 
             // 2. Check magic number (file signature)
-            const buffer = fs.readFileSync(file.path);
-            const type = await fileTypeFromBuffer(buffer);
+            const detected = await fileTypeFromFile(file.path);
 
-            if (!type || !allowedTypes.includes(type.mime)) {
-                cleanupFiles(filesToValidate);
-                return next(new AppError(
-                    `Unsupported file type (${type?.mime || 'unknown'}). Allowed types: ${allowedTypes.join(', ')}`,
-                    400
-                ));
+            if (!isAllowed(detected, file, allowedTypes)) {
+                await removeFiles(files.map((item) => item.path));
+                return next(
+                    new AppError(
+                        `Unsupported file type (${detected?.mime || "unknown"}). Allowed types: ${allowedTypes.join(", ")}`,
+                        400
+                    )
+                );
             }
         }
 
         return next();
-    } catch (error) {
+    } catch {
         // Cleanup on unexpected errors
-        if (req.file) cleanupFiles([req.file]);
-        if (req.files) {
-            const allFiles = Array.isArray(req.files) ? req.files : Object.values(req.files).flat();
-            cleanupFiles(allFiles);
-        }
+        await removeFiles(files.map((item) => item.path));
         return next(new AppError("Internal server error during file validation", 500));
     }
 };

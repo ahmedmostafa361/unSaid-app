@@ -1,10 +1,9 @@
 import { OAuth2Client } from "google-auth-library";
 import { AppError } from "../errors/error.js";
-import {env} from "../config/env.js";
+import { env } from "../config/env.js";
 
 // Initialize client once outside the function scope
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
+const client = new OAuth2Client(env.googleClientId);
 
 export const verifyGoogleToken = async (idToken) => {
     try {
@@ -14,7 +13,7 @@ export const verifyGoogleToken = async (idToken) => {
         });
 
         return ticket.getPayload();
-    } catch (error) {
+    } catch {
         throw new AppError("Invalid or expired Google Token", 401);
     }
 };

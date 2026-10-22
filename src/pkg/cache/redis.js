@@ -1,5 +1,5 @@
 // redis.js
-import { Redis } from '@upstash/redis';
+import { Redis } from "@upstash/redis";
 
 export class RedisCacheProvider {
     client;
@@ -20,11 +20,29 @@ export class RedisCacheProvider {
         return this.client.set(key, value);
     }
 
+    async setIfNotExists(key, value, ttl) {
+        const result = await this.client.set(key, value, { nx: true, ex: ttl });
+        return result === "OK";
+    }
+
     async get(key) {
         return this.client.get(key);
     }
 
-    async delete(key) {
-        return this.client.del(key);
+    async delete(...keys) {
+        if (keys.length === 0) return 0;
+        return this.client.del(...keys);
+    }
+
+    async increment(key) {
+        return this.client.incr(key);
+    }
+
+    async expire(key, ttl) {
+        return this.client.expire(key, ttl);
+    }
+
+    async ttl(key) {
+        return this.client.ttl(key);
     }
 }

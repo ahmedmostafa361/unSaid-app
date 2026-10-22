@@ -1,12 +1,18 @@
 import jwt from "jsonwebtoken";
-import {toMs} from "./time.js";
-import {env} from "../../lib/config/env.js";
+import crypto from "node:crypto";
+
 /// generate token
-export const generateToken = (payload) =>{
-    return jwt.sign(
-        payload
-        ,env.jwtSecret,
-        {
-            expiresIn: toMs(1, "hours")
-        });
-}
+export const generateToken = (payload, secret, expiresInSeconds) => {
+    return jwt.sign(payload, secret, {
+        algorithm: "HS256",
+        expiresIn: expiresInSeconds,
+    });
+};
+
+export const verifyToken = (token, secret) => {
+    return jwt.verify(token, secret, { algorithms: ["HS256"] });
+};
+
+export const generateRandomToken = (bytes = 48) => {
+    return crypto.randomBytes(bytes).toString("base64url");
+};
