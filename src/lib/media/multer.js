@@ -4,8 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { AppError } from "../errors/error.js";
 import { allowedFields, MAX_FILE_SIZE } from "./file.validation.js";
+import { env } from "../config/env.js";
 
-export const UPLOADS_DIR = "uploads";
+export const UPLOADS_URL_PREFIX = "uploads";
+
+export const UPLOADS_DIR = env.isServerless ? path.join("/tmp", "uploads") : "uploads";
 
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
@@ -55,4 +58,8 @@ export function uploadMultipleFileWithSize(fields, allowedTypes = allowedFields.
     return fileUpload(allowedTypes, maxFiles).fields(fields);
 }
 
-export const toPublicPath = (filePath) => (filePath ? filePath.split(path.sep).join("/") : null);
+const fileNameOf = (storedPath) => String(storedPath).split(/[\\/]/).pop();
+
+export const toPublicPath = (filePath) => (filePath ? `${UPLOADS_URL_PREFIX}/${fileNameOf(filePath)}` : null);
+
+export const toDiskPath = (publicPath) => (publicPath ? path.join(UPLOADS_DIR, fileNameOf(publicPath)) : null);

@@ -4,6 +4,7 @@ import * as conversationRepository from "../repository/conversation.repo.js";
 import * as userRepository from "../../user/repository/user.repo.js";
 import { IDENTITY_REQUEST_STATUS } from "../../../lib/config/constants.js";
 import { sendEmailInBackground } from "../../../lib/email/init.js";
+import { runInBackground } from "../../../lib/utils/background.js";
 import { getIdentityRequestEmail } from "../../../lib/templates/emailTemplates.js";
 import { buildPagination } from "../../../lib/utils/pagination.js";
 import {
@@ -64,7 +65,7 @@ export async function createIdentityRequest(userId, messageId, note = "") {
         throw error;
     }
 
-    notifySender(message.sender).catch(() => {});
+    runInBackground(() => notifySender(message.sender));
 
     return {
         _id: request._id,

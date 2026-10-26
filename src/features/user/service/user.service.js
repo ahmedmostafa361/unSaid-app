@@ -7,7 +7,7 @@ import * as requestRepository from "../../message/repository/request.repo.js";
 import { invalidateUserCaches } from "../../../lib/cache/cache.service.js";
 import { sendEmailInBackground } from "../../../lib/email/init.js";
 import { getPasswordChangedEmail } from "../../../lib/templates/emailTemplates.js";
-import { toPublicPath } from "../../../lib/media/multer.js";
+import { toDiskPath, toPublicPath } from "../../../lib/media/multer.js";
 import { buildPagination } from "../../../lib/utils/pagination.js";
 import { randomUsernameFrom } from "../../../lib/utils/username.js";
 import { comparePassword, hashPassword } from "../../../pkg/utils/hash.js";
@@ -143,7 +143,7 @@ export const uploadProfilePictureService = async (userId, file) => {
     }
 
     // 2. Delete old image from server if it exists
-    await removeFile(user.profilePicturePath);
+    await removeFile(toDiskPath(user.profilePicturePath));
 
     // 3. Update new image path matching schema property
     const profilePicturePath = toPublicPath(file.path);
@@ -155,7 +155,7 @@ export const uploadProfilePictureService = async (userId, file) => {
 export const removeProfilePicture = async (userId) => {
     const user = await getActiveUser(userId);
     await userRepository.updateUserById(userId, { profilePicturePath: null });
-    await removeFile(user.profilePicturePath);
+    await removeFile(toDiskPath(user.profilePicturePath));
     await invalidateUserCaches(user.username);
 };
 
@@ -168,7 +168,7 @@ export const uploadCoverImages = async (userId, files) => {
 
     const coverImagePath = files.map((file) => toPublicPath(file.path));
     await userRepository.updateUserById(userId, { coverImagePath });
-    await removeFiles(user.coverImagePath ?? []);
+    await removeFiles((user.coverImagePath ?? []).map(toDiskPath));
     await invalidateUserCaches(user.username);
     return { coverImagePath };
 };
@@ -182,7 +182,7 @@ export const uploadCv = async (userId, file) => {
 
     const cvPath = toPublicPath(file.path);
     await userRepository.updateUserById(userId, { cvPath });
-    await removeFile(user.cvPath);
+    await removeFile(toDiskPath(user.cvPath));
     return { cvPath };
 };
 

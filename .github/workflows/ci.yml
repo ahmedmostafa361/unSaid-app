@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Syntax check and smoke test
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      upstash:
+        image: hiett/serverless-redis-http:latest
+        ports:
+          - 8079:80
+        env:
+          SRH_MODE: env
+          SRH_TOKEN: ci-token
+          SRH_CONNECTION_STRING: redis://redis:6379
+
+    env:
+      NODE_ENV: test
+      PORT: "3000"
+      MONGODB_URI: mongodb://localhost:27017/unsaid_ci
+      JWT_SECRET: ci-only-secret-not-used-anywhere-else
+      CORS_ORIGINS: http://localhost:4200
+      EMAIL_PROVIDER: nodemailer
+      MAIL_HOST: localhost
+      MAIL_PORT: "2525"
+      MAIL_USER: ci@unsaid.local
+      MAIL_PASS: ci
+      GOOGLE_CLIENT_ID: ci.apps.googleusercontent.com
+      UPSTASH_REDIS_REST_URL: http://localhost:8079
+      UPSTASH_REDIS_REST_TOKEN: ci-token
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.18.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check
+        run: npm run check
+
+      - name: Start the API
+        run: |
+          node src/server.js > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/health > /dev/null; then
+              echo "API is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          cat server.log
+          exit 1
+
+      - name: Smoke test
+        run: npm run smoke
+
+      - name: Server log
+        if: always()
+        run: cat server.log || true
