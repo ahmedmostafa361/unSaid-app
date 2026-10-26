@@ -1,0 +1,8 @@
+uploads
+docs
+.github
+.env
+.env.*
+!.env.example
+.idea
+scripts

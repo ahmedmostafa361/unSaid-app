@@ -70,6 +70,7 @@ const parsedEnv = result.data;
 export const env = {
     nodeEnv: parsedEnv.NODE_ENV,
     isProduction: parsedEnv.NODE_ENV === "production",
+    isServerless: Boolean(process.env.VERCEL),
     port: Number(parsedEnv.PORT),
     mongoURI: parsedEnv.MONGODB_URI,
     jwtSecret: parsedEnv.JWT_SECRET,

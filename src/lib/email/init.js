@@ -4,6 +4,7 @@ import { MailjetProvider } from "../../pkg/email/mailjet.js";
 import { NodemailerProvider } from "../../pkg/email/nodemailer.js";
 import { logger } from "../../pkg/logger/logger.js";
 import { AppError } from "../errors/error.js";
+import { runInBackground } from "../utils/background.js";
 
 const createProvider = () => {
     if (env.emailProvider === "mailjet") {
@@ -40,5 +41,5 @@ export const sendEmail = async (to, subject, html) => {
 };
 
 export const sendEmailInBackground = (to, subject, html) => {
-    sendEmail(to, subject, html).catch(() => {});
+    runInBackground(() => sendEmail(to, subject, html));
 };

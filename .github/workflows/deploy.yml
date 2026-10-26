@@ -1,0 +1,45 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify (CI)
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  release:
+    name: Deploy to production
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.18.0"
+
+      - name: Deploy this exact commit to Vercel production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+
+      - name: Smoke test production
+        env:
+          SMOKE_BASE_URL: ${{ secrets.PRODUCTION_URL }}
+        run: node scripts/smoke.mjs

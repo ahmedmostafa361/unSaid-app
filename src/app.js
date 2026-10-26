@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import { env } from "./lib/config/env.js";
 import { globalErrorHandler, notFoundHandler } from "./lib/errors/error.handler.js";
 import { correlationId } from "./lib/correlation/correlationld.js";
-import { UPLOADS_DIR } from "./lib/media/multer.js";
+import { UPLOADS_DIR, UPLOADS_URL_PREFIX } from "./lib/media/multer.js";
 import { router } from "./routes.js";
 
 export function createApp() {
@@ -24,7 +24,7 @@ export function createApp() {
             exposedHeaders: ["X-Correlation-ID", "Retry-After", "X-RateLimit-Limit", "X-RateLimit-Remaining"],
         })
     );
-    app.use(`/${UPLOADS_DIR}`, express.static(UPLOADS_DIR, { maxAge: "7d", index: false }));
+    app.use(`/${UPLOADS_URL_PREFIX}`, express.static(UPLOADS_DIR, { maxAge: "7d", index: false }));
     app.use(express.json({ limit: "100kb" }));
     app.use(cookieParser());
 
